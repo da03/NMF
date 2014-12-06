@@ -1,15 +1,14 @@
-# Sparse Coding Makefile
+# Nonnegative Matrix Factorization Makefile
 
 # Figure out app path
-SPARSECODING_DIR := $(shell readlink $(dir $(lastword $(MAKEFILE_LIST))) -f)
-PETUUM_ROOT = $(SPARSECODING_DIR)/../../
+NMF_DIR := $(shell readlink $(dir $(lastword $(MAKEFILE_LIST))) -f)
+PETUUM_ROOT = $(NMF_DIR)/../../
 
 include $(PETUUM_ROOT)/defns.mk
 
 # Define macros in src/matrix_loader.hpp
 # Element in matrix whose absolute value is smaller than INFINITESIMAL is 
-# considered 0, such that you will not see something like 1e-10 in the
-# result of coefficients S
+# considered 0
 PETUUM_CXXFLAGS += -DINFINITESIMAL=0.00001
 # Element in matrix is set to MAXELEVAL if its value exceeds MAXELEVAL
 # This bound is to prevent numeric overflow
@@ -18,34 +17,34 @@ PETUUM_CXXFLAGS += -DMAXELEVAL=100000
 # This bound is to prevent numeric overflow
 PETUUM_CXXFLAGS += -DMINELEVAL=-100000
 
-SPARSECODING_SRC = $(wildcard $(SPARSECODING_DIR)/src/*.cpp)
-SPARSECODING_HDR = $(wildcard $(SPARSECODING_DIR)/src/*.hpp)
-SPARSECODING_BIN = $(SPARSECODING_DIR)/bin
-SPARSECODING_OBJ = $(SPARSECODING_SRC:.cpp=.o)
-UTIL_SRC = $(wildcard $(SPARSECODING_DIR)/src/util/*.cpp)
-UTIL_HDR = $(wildcard $(SPARSECODING_DIR)/src/util/*.hpp)
+NMF_SRC = $(wildcard $(NMF_DIR)/src/*.cpp)
+NMF_HDR = $(wildcard $(NMF_DIR)/src/*.hpp)
+NMF_BIN = $(NMF_DIR)/bin
+NMF_OBJ = $(NMF_SRC:.cpp=.o)
+UTIL_SRC = $(wildcard $(NMF_DIR)/src/util/*.cpp)
+UTIL_HDR = $(wildcard $(NMF_DIR)/src/util/*.hpp)
 UTIL_OBJ = $(UTIL_SRC:.cpp=.o)
 
-all: sparsecoding_main
+all: nmf_main 
 
-sparsecoding_main: $(SPARSECODING_BIN)/sparsecoding_main
+nmf_main: $(NMF_BIN)/nmf_main
 
-$(SPARSECODING_BIN):
-	mkdir -p $(SPARSECODING_BIN)
+$(NMF_BIN):
+	mkdir -p $(NMF_BIN)
 
-$(SPARSECODING_BIN)/sparsecoding_main: $(SPARSECODING_OBJ) $(UTIL_OBJ) $(PETUUM_PS_LIB) $(SPARSECODING_BIN)
+$(NMF_BIN)/nmf_main: $(NMF_OBJ) $(UTIL_OBJ) $(PETUUM_PS_LIB) $(NMF_BIN)
 	$(PETUUM_CXX) $(PETUUM_CXXFLAGS) $(PETUUM_INCFLAGS) \
-	$(SPARSECODING_OBJ) $(UTIL_OBJ) $(PETUUM_PS_LIB) $(PETUUM_LDFLAGS) -o $@
+	$(NMF_OBJ) $(UTIL_OBJ) $(PETUUM_PS_LIB) $(PETUUM_LDFLAGS) -o $@
 
-$(SPARSECODING_OBJ): %.o: %.cpp $(SPARSECODING_HDR) $(UTIL_HDR)
+$(NMF_OBJ): %.o: %.cpp $(NMF_HDR) $(UTIL_HDR)
 	$(PETUUM_CXX) $(PETUUM_CXXFLAGS) -Wno-unused-result $(PETUUM_INCFLAGS) -c $< -o $@
 
 $(UTIL_OBJ): %.o: %.cpp $(UTIL_HDR)
 	$(PETUUM_CXX) $(PETUUM_CXXFLAGS) -Wno-unused-result $(PETUUM_INCFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(SPARSECODING_OBJ)
+	rm -rf $(NMF_OBJ)
 	rm -rf $(UTIL_OBJ)
-	rm -rf $(SPARSECODING_BIN)
+	rm -rf $(NMF_BIN)
 
-.PHONY: clean sparsecoding_main
+.PHONY: clean nmf_main

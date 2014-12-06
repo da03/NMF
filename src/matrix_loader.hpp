@@ -22,7 +22,7 @@
 #define MINELEVAL -100000.0
 #endif
 
-namespace sparsecoding {
+namespace NMF {
 
 template <class T>
 class MatrixLoader {
@@ -61,6 +61,11 @@ class MatrixLoader {
         void IncCol(int j_client, std::vector<T> & inc);
         void IncCol(int j_client, 
                 Eigen::Matrix<T, Eigen::Dynamic, 1> & inc);
+        void IncCol(int j_client, std::vector<T> & inc, T low);
+        void IncCol(int j_client, 
+                Eigen::Matrix<T, Eigen::Dynamic, 1> & inc, T low);
+
+    private:
 
     private:
         // matrix elements are saved in vector <vector <T> >
@@ -70,4 +75,4 @@ class MatrixLoader {
         // mutex prevents contension
         std::mutex * mtx_;
 };
-}; // namespace sparsecoding
+}; // namespace NMF 

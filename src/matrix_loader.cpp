@@ -7,7 +7,7 @@
 #include <iostream>
 #include <glog/logging.h>
 
-namespace sparsecoding {
+namespace NMF {
 
 // Constructor
 template <class T>
@@ -226,6 +226,27 @@ void MatrixLoader<T>::IncCol(int j_client, std::vector<T> & inc) {
 
 // Modify column of matrix
 template <class T>
+void MatrixLoader<T>::IncCol(int j_client, std::vector<T> & inc, T low) {
+    std::unique_lock<std::mutex> lck (*(mtx_+j_client));
+    for (int i = 0; i < m_; ++i) {
+        data_[j_client][i] += inc[i];
+        if ((data_[j_client][i] > -INFINITESIMAL) 
+                && (data_[j_client][i] < INFINITESIMAL)) {
+            data_[j_client][i] = 0.0;
+        }
+        if (data_[j_client][i] > MAXELEVAL) {
+            data_[j_client][i] = MAXELEVAL;
+        }
+        if (data_[j_client][i] < MINELEVAL) {
+            data_[j_client][i] = MINELEVAL;
+        }
+        if (data_[j_client][i] < low) {
+            data_[j_client][i] = low;
+        }
+    }
+}
+// Modify column of matrix
+template <class T>
 void MatrixLoader<T>::IncCol(int j_client, 
         Eigen::Matrix<T, Eigen::Dynamic, 1> & inc) {
     std::unique_lock<std::mutex> lck (*(mtx_+j_client));
@@ -244,5 +265,28 @@ void MatrixLoader<T>::IncCol(int j_client,
     }
 }
 
+// Modify column of matrix
+template <class T>
+void MatrixLoader<T>::IncCol(int j_client, 
+        Eigen::Matrix<T, Eigen::Dynamic, 1> & inc, T low) {
+    std::unique_lock<std::mutex> lck (*(mtx_+j_client));
+    for (int i = 0; i < m_; i++) {
+        data_[j_client][i] += inc(i);
+        if ((data_[j_client][i] > -INFINITESIMAL) 
+                && (data_[j_client][i] < INFINITESIMAL)) {
+            data_[j_client][i] = 0.0;
+        }
+        if (data_[j_client][i] > MAXELEVAL) {
+            data_[j_client][i] = MAXELEVAL;
+        }
+        if (data_[j_client][i] < MINELEVAL) {
+            data_[j_client][i] = MINELEVAL;
+        }
+        if (data_[j_client][i] < low) {
+            data_[j_client][i] = low;
+        }
+    }
+}
+
 template class MatrixLoader<float>;
-} // namespace sparsecoding
+} // namespace NMF
